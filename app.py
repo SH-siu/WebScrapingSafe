@@ -511,7 +511,7 @@ else:
     )
 
     # レイアウト作成
-    col1, col2 = st.columns([8.5, 1.5], vertical_alignment="bottom")
+    col1, col2 = st.columns([8.8, 1.2], vertical_alignment="bottom")
 
     with col1:
         # テキストエリア。valueではなくkeyで管理します。
