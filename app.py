@@ -8,8 +8,8 @@ from openpyxl import load_workbook
 from openpyxl.styles import Alignment,Font
 from bs4 import BeautifulSoup
 
-VERSION = "1.6.0"
-UPDATED = "2026/09/11"
+VERSION = "1.6.1"
+UPDATED = "2026/09/24"
 
 headers = {
     "User-Agent": (
@@ -511,7 +511,7 @@ else:
     )
 
     # レイアウト作成
-    col1, col2 = st.columns([9, 1], vertical_alignment="bottom")
+    col1, col2 = st.columns([8.5, 1.5], vertical_alignment="bottom")
 
     with col1:
         # テキストエリア。valueではなくkeyで管理します。
