@@ -118,6 +118,14 @@ def normalize_text(text,remove_words):
 
     return result
 
+def searchDate(lines, index, pattern):
+  recordLength = 12
+  for i in range(recordLength):
+    date = lines[index+i]
+    if re.search(pattern, date):
+      return i
+  return -1
+
 def get_country(text):
     found = []
 
