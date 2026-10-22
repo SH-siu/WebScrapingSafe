@@ -8,8 +8,13 @@ from openpyxl import load_workbook
 from openpyxl.styles import Alignment,Font
 from bs4 import BeautifulSoup
 
-VERSION = "1.6.1"
-UPDATED = "2026/09/24"
+VERSION = "1.7.0"
+UPDATED = "2026/10/22"
+
+country_df = pd.read_csv("country.csv", encoding="cp932")
+
+# 英語名をキー、日本語名を値とする辞書を作成
+country_dict = dict(zip(country_df["英語名"], country_df["日本語名"]))
 
 headers = {
     "User-Agent": (
@@ -113,13 +118,29 @@ def normalize_text(text,remove_words):
 
     return result
 
-def searchDate(lines, index, pattern):
-  recordLength = 12
-  for i in range(recordLength):
-    date = lines[index+i]
-    if re.search(pattern, date):
-      return i
-  return -1
+def get_country(text):
+    found = []
+
+    for english_name in sorted(country_dict.keys(), key=len, reverse=True):
+        escaped_name = re.escape(english_name)
+
+        if english_name.endswith("."):
+            pattern = r"\b" + escaped_name
+        else:
+            pattern = r"\b" + escaped_name + r"\b"
+
+        if english_name == "US":
+            flags = 0
+        else:
+            flags = re.IGNORECASE
+
+        if re.search(pattern, text, flags):
+            japanese_name = country_dict[english_name]
+
+            if japanese_name not in found:
+                found.append(japanese_name)
+
+    return "、".join(found)
 
 #AtlanticCouncil
 def get_atlanticCouncil_articles(text):
@@ -179,7 +200,8 @@ def get_atlanticCouncil_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"Atlantic Council","",f"{topic1}、{topic2}",author,"",overview])
+        country = get_country(f"{title} {topic1} {topic2} {overview}")
+        rows.append(["", date, title, fullurl,"Atlantic Council",country,f"{topic1}、{topic2}",author,"",overview])
         index += 7
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
@@ -230,7 +252,8 @@ def get_csis_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"CSIS","","",author,"",overview])
+        country = get_country(f"{title} {overview}")
+        rows.append(["", date, title, fullurl,"CSIS",country,"",author,"",overview])
         index += 3
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
@@ -282,7 +305,8 @@ def get_brookings_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"Brookings Institute","",topic,author,"",""])
+        country = get_country(f"{title} {topic}")
+        rows.append(["", date, title, fullurl,"Brookings Institute",country,topic,author,"",""])
         index += 5
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
@@ -328,7 +352,8 @@ def get_cfr_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"CFR","","N/A",author,"",""])
+        country = get_country(f"{title}")
+        rows.append(["", date, title, fullurl,"CFR",country,"N/A",author,"",""])
         index += 3
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
@@ -378,7 +403,8 @@ def get_hudson_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"Hudson","",topic,author,"",""])
+        country = get_country(f"{title} {topic}")
+        rows.append(["", date, title, fullurl,"Hudson",country,topic,author,"",""])
         index += 5
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
@@ -444,7 +470,8 @@ def get_cnas_articles(text):
         if(not url_exists(fullurl)):
             fullurl = "N/A"
 
-        rows.append(["", date, title, fullurl,"CNAS","",topic,author,"",overview])
+        country = get_country(f"{title} {topic} {overview}")
+        rows.append(["", date, title, fullurl,"CNAS",country,topic,author,"",overview])
         index += 5
         time.sleep(0.5)
     df = pd.DataFrame(rows, columns=["#", "日付", "レポートタイトル", "URL","Thinktank名","関係国","トピック","執筆者","まとめ翻訳","まとめ翻訳英文"])
